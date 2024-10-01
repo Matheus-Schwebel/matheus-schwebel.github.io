@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospedagem de Código HTML</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 20px;
+            font-family: monospace;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: #e9ecef;
+            margin: 5px 0;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .preview {
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: #fafafa;
+            min-height: 200px;
+            margin-top: 20px;
+        }
+        .code-source {
+            background: #f8f9fa;
+            border: 1px solid #ccc;
+            padding: 10px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hospedagem de Código HTML</h1>
+        <textarea id="codeInput" placeholder="Cole seu código HTML aqui..."></textarea>
+        <button id="saveButton">Salvar Código</button>
+        <h2>Códigos Salvos:</h2>
+        <ul id="codeList"></ul>
+        <h2>Visualização:</h2>
+        <div id="preview" class="preview"></div>
+        <h2>Código-Fonte:</h2>
+        <div id="sourceCode" class="code-source"></div>
+    </div>
+
+    <script>
+        // Função para atualizar a lista de códigos salvos
+        function updateCodeList() {
+            const codeList = document.getElementById('codeList');
+            codeList.innerHTML = ''; // Limpa a lista atual
+            const codes = JSON.parse(localStorage.getItem('codes')) || [];
+
+            codes.forEach((code, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `Código ${index + 1}
+                    <button onclick="viewCode(${index})">Visualizar</button>
+                    <button onclick="viewSource(${index})">Código-Fonte</button>
+                    <button onclick="deleteCode(${index})">Excluir</button>`;
+                codeList.appendChild(li);
+            });
+        }
+
+        // Função para salvar o código
+        document.getElementById('saveButton').addEventListener('click', function() {
+            const codeInput = document.getElementById('codeInput').value;
+            const codes = JSON.parse(localStorage.getItem('codes')) || [];
+            codes.push(codeInput); // Adiciona o novo código à lista
+            localStorage.setItem('codes', JSON.stringify(codes)); // Salva a lista no localStorage
+            updateCodeList(); // Atualiza a lista exibida
+            document.getElementById('codeInput').value = ''; // Limpa o campo de entrada
+        });
+
+        // Função para visualizar um código
+        function viewCode(index) {
+            const codes = JSON.parse(localStorage.getItem('codes')) || [];
+            const preview = document.getElementById('preview');
+            preview.innerHTML = codes[index]; // Mostra o código correspondente na visualização
+        }
+
+        // Função para visualizar o código-fonte
+        function viewSource(index) {
+            const codes = JSON.parse(localStorage.getItem('codes')) || [];
+            const sourceCode = document.getElementById('sourceCode');
+            sourceCode.textContent = codes[index]; // Mostra o código-fonte correspondente
+        }
+
+        // Função para excluir um código
+        function deleteCode(index) {
+            const codes = JSON.parse(localStorage.getItem('codes')) || [];
+            codes.splice(index, 1); // Remove o código pelo índice
+            localStorage.setItem('codes', JSON.stringify(codes)); // Atualiza o localStorage
+            updateCodeList(); // Atualiza a lista exibida
+            document.getElementById('preview').innerHTML = ''; // Limpa a visualização
+            document.getElementById('sourceCode').textContent = ''; // Limpa o código-fonte
+        }
+
+        // Atualiza a lista de códigos ao carregar a página
+        window.onload = function() {
+            updateCodeList();
+        };
+    </script>
+</body>
+</html>
