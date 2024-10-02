@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospedagem de Código Python</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.9.5/brython.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        textarea, input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: #e9ecef;
+            margin: 5px 0;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .preview {
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: #fafafa;
+            min-height: 200px;
+            margin-top: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body onload="brython()">
+    <div class="container">
+        <h1>Login para Hospedagem de Código Python</h1>
+        
+        <!-- Área de Login -->
+        <div id="loginSection">
+            <input type="text" id="usernameInput" placeholder="Digite seu nome de usuário" />
+            <input type="password" id="passwordInput" placeholder="Digite sua senha" />
+            <button id="loginButton">Login</button>
+        </div>
+        
+        <!-- Área de Hospedagem (escondida até o login) -->
+        <div id="hostingSection" class="hidden">
+            <h1>Hospedagem de Código Python</h1>
+            <input type="text" id="repoTitle" placeholder="Título do Repositório" />
+            <textarea id="codeInput" placeholder="Cole seu código Python aqui..."></textarea>
+            <button id="saveButton">Salvar Código</button>
+            <h2>Códigos Salvos:</h2>
+            <ul id="codeList"></ul>
+            <h2>Visualização:</h2>
+            <div id="preview" class="preview"></div>
+        </div>
+    </div>
+
+    <script>
+        // Sistema básico de login com dados mock
+        const users = {
+            'usuario1': 'senha123',
+            'usuario2': 'senha456'
+        };
+
+        // Função de Login
+        document.getElementById('loginButton').addEventListener('click', function() {
+            const username = document.getElementById('usernameInput').value;
+            const password = document.getElementById('passwordInput').value;
+
+            // Verifica se o usuário e senha são válidos
+            if (users[username] && users[username] === password) {
+                localStorage.setItem('loggedInUser', username); // Armazena o usuário logado
+                document.getElementById('loginSection').classList.add('hidden'); // Esconde a área de login
+                document.getElementById('hostingSection').classList.remove('hidden'); // Mostra a área de hospedagem
+                updateCodeList(); // Carrega os códigos do usuário
+            } else {
+                alert('Usuário ou senha inválidos!');
+            }
+        });
+
+        // Função para atualizar a lista de códigos salvos do usuário logado
+        function updateCodeList() {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            const codeList = document.getElementById('codeList');
+            codeList.innerHTML = ''; // Limpa a lista atual
+            const codes = JSON.parse(localStorage.getItem(`codes_${loggedInUser}`)) || [];
+
+            codes.forEach((code, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${code.title}</strong> 
+                    <button onclick="viewCode(${index})">Brython View</button>
+                    <button onclick="viewSource(${index})">Código-fonte</button>
+                    <button onclick="deleteCode(${index})">Excluir</button>`;  
+                codeList.appendChild(li);
+            });
+        }
+
+        // Função para salvar o código
+        document.getElementById('saveButton').addEventListener('click', function() {
+            const repoTitle = document.getElementById('repoTitle').value.trim();
+            const codeInput = document.getElementById('codeInput').value;
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            const codes = JSON.parse(localStorage.getItem(`codes_${loggedInUser}`)) || [];
+
+            if (repoTitle && codeInput) {
+                codes.push({ title: repoTitle, code: codeInput }); // Adiciona o novo código à lista
+                localStorage.setItem(`codes_${loggedInUser}`, JSON.stringify(codes)); // Salva a lista no localStorage
+                updateCodeList(); // Atualiza a lista exibida
+                document.getElementById('repoTitle').value = ''; // Limpa o campo do título
+                document.getElementById('codeInput').value = ''; // Limpa o campo de entrada
+            } else {
+                alert("Por favor, insira um título e um código.");
+            }
+        });
+
+        // Função para visualizar e executar um código
+        function viewCode(index) {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            const codes = JSON.parse(localStorage.getItem(`codes_${loggedInUser}`)) || [];
+            const preview = document.getElementById('preview');
+            preview.textContent = ''; // Limpa a visualização anterior
+
+            const codeToExecute = codes[index].code; // Captura o código
+
+            // Cria um novo script para executar o código Python
+            const script = document.createElement('script');
+            script.type = 'text/python';
+            script.textContent = codeToExecute;
+
+            // Adiciona o script à visualização e executa
+            preview.appendChild(script);
+            brython(); // Chama brython() para interpretar o novo script
+        }
+
+        // Função para exibir o código-fonte
+        function viewSource(index) {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            const codes = JSON.parse(localStorage.getItem(`codes_${loggedInUser}`)) || [];
+            const preview = document.getElementById('preview');
+            preview.textContent = ''; // Limpa a visualização anterior
+
+            // Exibe o código-fonte
+            const pre = document.createElement('pre');
+            pre.textContent = codes[index].code; // Adiciona o código-fonte ao elemento <pre>
+
+            // Exibe o código na área de visualização
+            preview.appendChild(pre);
+        }
+
+        // Função para excluir um código
+        function deleteCode(index) {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            const codes = JSON.parse(localStorage.getItem(`codes_${loggedInUser}`)) || [];
+            codes.splice(index, 1); // Remove o código pelo índice
+            localStorage.setItem(`codes_${loggedInUser}`, JSON.stringify(codes)); // Atualiza o localStorage
+            updateCodeList(); // Atualiza a lista exibida
+            document.getElementById('preview').textContent = ''; // Limpa a visualização
+        }
+
+        // Atualiza a lista de códigos ao carregar a página
+        window.onload = function() {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            if (loggedInUser) {
+                document.getElementById('loginSection').classList.add('hidden'); // Esconde a área de login se já estiver logado
+                document.getElementById('hostingSection').classList.remove('hidden'); // Mostra a área de hospedagem
+                updateCodeList(); // Carrega os códigos do usuário logado
+            }
+        };
+    </script>
+</body>
+</html>
+
