@@ -22,11 +22,14 @@
         h1 {
             text-align: center;
         }
-        textarea {
+        textarea, input {
             width: 100%;
-            height: 200px;
             margin-bottom: 20px;
             font-family: monospace;
+            padding: 10px;
+        }
+        textarea {
+            height: 200px;
         }
         button {
             display: block;
@@ -69,44 +72,27 @@
             overflow-x: auto;
             margin-top: 20px;
         }
-        .logout {
-            background-color: #dc3545;
-            margin-top: 20px;
-            padding: 10px;
-            color: white;
-            text-align: center;
-            cursor: pointer;
-            border-radius: 5px;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Hospedagem de Código HTML</h1>
+        
+        <input type="text" id="titleInput" placeholder="Digite o título do código...">
         <textarea id="codeInput" placeholder="Cole seu código HTML aqui..."></textarea>
         <button id="saveButton">Salvar Código</button>
+
         <h2>Códigos Salvos:</h2>
         <ul id="codeList"></ul>
+
         <h2>Visualização:</h2>
         <div id="preview" class="preview"></div>
+
         <h2>Código-Fonte:</h2>
         <div id="sourceCode" class="code-source"></div>
-        <div class="logout" onclick="logout()">Sair</div>
     </div>
 
     <script>
-        // Verifica se o usuário está logado
-        const loggedInUser = localStorage.getItem('loggedInUser');
-        if (!loggedInUser) {
-            window.location.href = 'login.html'; // Redireciona para a página de login se não estiver autenticado
-        }
-
-        // Função para sair do sistema
-        function logout() {
-            localStorage.removeItem('loggedInUser'); // Remove o status de login
-            window.location.href = 'login.html'; // Redireciona para a página de login
-        }
-
         // Função para atualizar a lista de códigos salvos
         function updateCodeList() {
             const codeList = document.getElementById('codeList');
@@ -115,36 +101,49 @@
 
             codes.forEach((code, index) => {
                 const li = document.createElement('li');
-                li.innerHTML = `Código ${index + 1}
-                    <button onclick="viewCode(${index})">Visualizar</button>
-                    <button onclick="viewSource(${index})">Código-Fonte</button>
-                    <button onclick="deleteCode(${index})">Excluir</button>`;
+                li.innerHTML = `
+                    <strong>${code.title}</strong>
+                    <div>
+                        <button onclick="viewCode(${index})">Visualizar</button>
+                        <button onclick="viewSource(${index})">Código-Fonte</button>
+                        <button onclick="deleteCode(${index})">Excluir</button>
+                    </div>`;
                 codeList.appendChild(li);
             });
         }
 
         // Função para salvar o código
         document.getElementById('saveButton').addEventListener('click', function() {
+            const titleInput = document.getElementById('titleInput').value;
             const codeInput = document.getElementById('codeInput').value;
+
+            if (!titleInput || !codeInput) {
+                alert('Por favor, preencha o título e o código!');
+                return;
+            }
+
             const codes = JSON.parse(localStorage.getItem('codes')) || [];
-            codes.push(codeInput); // Adiciona o novo código à lista
+            codes.push({ title: titleInput, code: codeInput }); // Adiciona o título e código à lista
             localStorage.setItem('codes', JSON.stringify(codes)); // Salva a lista no localStorage
             updateCodeList(); // Atualiza a lista exibida
-            document.getElementById('codeInput').value = ''; // Limpa o campo de entrada
+
+            // Limpa os campos de entrada
+            document.getElementById('titleInput').value = '';
+            document.getElementById('codeInput').value = '';
         });
 
         // Função para visualizar um código
         function viewCode(index) {
             const codes = JSON.parse(localStorage.getItem('codes')) || [];
             const preview = document.getElementById('preview');
-            preview.innerHTML = codes[index]; // Mostra o código correspondente na visualização
+            preview.innerHTML = codes[index].code; // Mostra o código correspondente na visualização
         }
 
         // Função para visualizar o código-fonte
         function viewSource(index) {
             const codes = JSON.parse(localStorage.getItem('codes')) || [];
             const sourceCode = document.getElementById('sourceCode');
-            sourceCode.textContent = codes[index]; // Mostra o código-fonte correspondente
+            sourceCode.textContent = codes[index].code; // Mostra o código-fonte correspondente
         }
 
         // Função para excluir um código
@@ -159,10 +158,8 @@
 
         // Atualiza a lista de códigos ao carregar a página
         window.onload = function() {
-                        updateCodeList();
+            updateCodeList();
         };
     </script>
 </body>
 </html>
-
-           
