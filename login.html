@@ -50,16 +50,22 @@
     </div>
 
     <script>
+        // Lista de usuários e senhas
+        const users = [
+            { username: 'admin', password: '1234' },
+            { username: 'usuario1', password: 'senha1' },
+            { username: 'usuario2', password: 'senha2' }
+        ];
+
         function login() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            // Usuário e senha fixos para o exemplo
-            const validUsername = 'admin';
-            const validPassword = '1234';
+            // Verifica se o usuário e senha correspondem a algum dos usuários cadastrados
+            const user = users.find(user => user.username === username && user.password === password);
 
-            if (username === validUsername && password === validPassword) {
-                localStorage.setItem('loggedIn', true); // Marca como logado
+            if (user) {
+                localStorage.setItem('loggedInUser', username); // Marca o usuário como logado
                 window.location.href = 'dashboard.html'; // Redireciona para a página protegida
             } else {
                 document.getElementById('error').textContent = 'Usuário ou senha incorretos';
@@ -67,9 +73,10 @@
         }
 
         // Verifica se o usuário já está logado
-        if (localStorage.getItem('loggedIn')) {
+        if (localStorage.getItem('loggedInUser')) {
             window.location.href = 'dashboard.html';
         }
     </script>
 </body>
 </html>
+
