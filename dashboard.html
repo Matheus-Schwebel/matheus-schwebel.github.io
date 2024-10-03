@@ -72,6 +72,13 @@
             overflow-x: auto;
             margin-top: 20px;
         }
+        #logoutButton {
+            background-color: #dc3545;
+            margin-top: 20px;
+        }
+        #logoutButton:hover {
+            background-color: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -90,6 +97,8 @@
 
         <h2>Código-Fonte:</h2>
         <div id="sourceCode" class="code-source"></div>
+
+        <button id="logoutButton">Logout</button>
     </div>
 
     <script>
@@ -155,6 +164,12 @@
             document.getElementById('preview').innerHTML = ''; // Limpa a visualização
             document.getElementById('sourceCode').textContent = ''; // Limpa o código-fonte
         }
+
+        // Função para logout
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            localStorage.clear(); // Limpa o localStorage
+            window.location.href = 'login.html'; // Redireciona para a página de login ou outra página
+        });
 
         // Atualiza a lista de códigos ao carregar a página
         window.onload = function() {
