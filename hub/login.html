@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Usuário">
+        <input type="password" id="password" placeholder="Senha">
+        <button onclick="login()">Entrar</button>
+        <p id="error" style="color: red;"></p>
+    </div>
+
+    <script>
+        // Lista de usuários e senhas
+        const users = [
+            { username: 'admin', password: '1234' },
+            { username: 'usuario1', password: 'senha1' },
+            { username: 'usuario2', password: 'senha2' }
+        ];
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Verifica se o usuário e senha correspondem a algum dos usuários cadastrados
+            const user = users.find(user => user.username === username && user.password === password);
+
+            if (user) {
+                localStorage.setItem('loggedInUser', username); // Marca o usuário como logado
+                window.location.href = 'dashboard.html'; // Redireciona para a página protegida
+            } else {
+                document.getElementById('error').textContent = 'Usuário ou senha incorretos';
+            }
+        }
+
+        // Verifica se o usuário já está logado
+        if (localStorage.getItem('loggedInUser')) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>
