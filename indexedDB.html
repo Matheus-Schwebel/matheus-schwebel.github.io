@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<body>
+<h2>Salvar Screenshot com IndexedDB</h2>
+<button id="saveBtn">Salvar Screenshot</button>
+<button id="loadBtn">Carregar Screenshot</button>
+<img id="preview" style="max-width:300px; display:block; margin-top:10px;">
+
+<script>
+// Abrir banco de dados IndexedDB
+let db
+const request = indexedDB.open("ScreenshotDB", 1)
+
+request.onerror = (event) => console.error("Erro no DB", event)
+request.onsuccess = (event) => {
+    db = event.target.result
+    console.log("DB carregado")
+}
+request.onupgradeneeded = (event) => {
+    db = event.target.result
+    db.createObjectStore("screenshots", { keyPath: "id" })
+}
+
+// Função para salvar screenshot
+async function saveScreenshot() {
+    const canvas = document.createElement("canvas")
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+    const ctx = canvas.getContext("2d")
+    ctx.fillStyle = "#eee"
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.fillStyle = "#000"
+    ctx.font = "30px Arial"
+    ctx.fillText("Screenshot Simulado", 50, 50)
+
+    // Converter canvas para blob
+    const blob = await new Promise(res => canvas.toBlob(res, "image/png"))
+
+    // Salvar no IndexedDB
+    const tx = db.transaction("screenshots", "readwrite")
+    const store = tx.objectStore("screenshots")
+    store.put({ id: 1, image: blob })
+
+    tx.oncomplete = () => console.log("Screenshot salvo")
+    tx.onerror = (e) => console.error("Erro ao salvar", e)
+}
+
+// Função para carregar screenshot
+function loadScreenshot() {
+    const tx = db.transaction("screenshots", "readonly")
+    const store = tx.objectStore("screenshots")
+    const request = store.get(1)
+    request.onsuccess = (event) => {
+        const record = event.target.result
+        if (!record) return alert("Nenhuma screenshot salva")
+        
+        const url = URL.createObjectURL(record.image)
+        document.getElementById("preview").src = url
+    }
+}
+
+document.getElementById("saveBtn").onclick = saveScreenshot
+document.getElementById("loadBtn").onclick = loadScreenshot
+</script>
+</body>
+</html>
